@@ -1,20 +1,12 @@
-from helper import get_runners_data, pack_runners_data, get_results
-import os
-
+from helper import process_competition, pack_results_as_table
 
 compatitors = 'assignment_data/competitors2.json'
 results = 'assignment_data/results_RUN.txt'
 
 
 if __name__ == '__main__':
-    print("hello!")
+    results_table = process_competition(compatitors_data_file=compatitors, results_data_file=results)
+    print(results_table)
 
-    # print(path)
-    runners = pack_runners_data(get_runners_data(compatitors))
-
-    for runner in runners:
-        print(runner)
-
-    print(get_results(results))
-
-    # print
+    print(f'\n or as table: \n\n')
+    print(pack_results_as_table(results_table))
