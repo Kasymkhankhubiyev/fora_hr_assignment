@@ -1,6 +1,23 @@
 """
     В этом модуле реализованы функции, которые парсят данные, 
     обрабатывают и выдают в нужном виде.
+
+    Создаем Дата-класс `Runner` - хранит имя и фамилию бегуна
+
+    Функции `_get_runners_data` и `_get_results_data` читают данные из файлов.
+
+    Далее данные поступают в функции обработчики.
+
+    `_pack_runners_data` упаковывается данные о бегунах в словарь, 
+    в котором нагрудный номер - это ключ, значение - экземпляр дата-класса Runner. возвращает словарь. 
+    Было решено упаковать в словарь, т.к. проще получить данные о бегуне при создании конечного списка.
+    С дата классом типа именованного кортожеа просто удобнее работать.
+
+    `_process_results` - обрабатывает результаты - рассчитывает время бега, 
+    сортирует бегунов по времени и возвращается отсортированный список
+
+    функция `_make_final_output` получается словарь бегунов и массив результатов, собирает все в конечный словарь
+    в формате << | место | нагрудный номер | имя | фамилия | время | >>
 """
 
 import json 
@@ -19,6 +36,11 @@ class Runner(NamedTuple):
 
 
 def _get_runners_data(file: str) -> dict:
+    """ Читает файл в формате json, который хранит информацию о спортсменах.
+    возвращает словарь.
+
+    применяется кодировка 'utf-8-sig', чтобы нормально обработать BOM.
+    """
     with io.open(file, encoding='utf-8-sig', mode='r') as json_file:
         runners_data = json.load(json_file)
 
@@ -26,6 +48,12 @@ def _get_runners_data(file: str) -> dict:
 
 
 def _pack_runners_data(data: dict) -> 'dict[str, Runner]':
+    """Обрабатываем прочитанные данные из json файла.
+    Удаляем BOM = '\ufeff' из значений ключей.
+
+    Данные о спортсменах упаковываем в дата-класс Runner.
+    Все упаковывем в словарь: ключ - нагрудный номер, значение - Runner
+    """
     runners = dict()
     keys = data.keys()
     for key in keys:
@@ -39,7 +67,9 @@ def _pack_runners_data(data: dict) -> 'dict[str, Runner]':
     return runners
 
 
-def _get_results(file: str) -> list:
+def _get_results_data(file: str) -> list:
+    """Читаем построчно текстовый файл и разделяем данные в список
+    """
     with io.open(file, encoding='utf-8-sig', mode='r') as file:
         results = file.readlines()
 
@@ -56,8 +86,8 @@ def _process_results(results: list) -> list:
 
     for i in range(0, len(results), 2):
 
-        start = results[i][2][:len(results[i][2])-2]
-        finish = results[i+1][2][:len(results[i+1][2])-2]
+        start = results[i][2][:len(results[i][2])-1]
+        finish = results[i+1][2][:len(results[i+1][2])-1]
 
         start = datetime.datetime.strptime(start, '%H:%M:%S,%f')
         finish = datetime.datetime.strptime(finish, '%H:%M:%S,%f')
@@ -91,7 +121,7 @@ def _make_final_output(results: list, runners: 'dict[str, Runner]') -> list:
 def process_competition(compatitors_data_file: str, results_data_file: str) -> list:
     runners = _get_runners_data(compatitors_data_file)
     runners = _pack_runners_data(runners)
-    results = _get_results(results_data_file)
+    results = _get_results_data(results_data_file)
     results = _process_results(results)
     output = _make_final_output(results=results, runners=runners)
 
