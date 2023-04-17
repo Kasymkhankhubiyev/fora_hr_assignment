@@ -24,7 +24,6 @@ import json
 import io
 from typing import NamedTuple
 import datetime
-import numpy as np
 
 class Runner(NamedTuple):
     name: str
